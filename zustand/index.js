@@ -7,6 +7,8 @@ export const useStore = create(
     (set) => ({
       isEnabled: false,
       toggleIsEnabled: () => set((state) => ({ isEnabled: !state.isEnabled })),
+      user: null,
+      setUser: (user) => set({ user }),
     }),
     { name: "enabled-store", storage: createJSONStorage(() => AsyncStorage) }
   )
