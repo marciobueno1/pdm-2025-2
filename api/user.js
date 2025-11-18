@@ -1,21 +1,4 @@
-import axios from "axios";
-
-const headerJson = {
-  "Content-Type": "application/json",
-};
-
-const headerRevocableSession = {
-  "X-Parse-Revocable-Session": "1",
-};
-
-const instance = axios.create({
-  baseURL: "https://parseapi.back4app.com",
-  timeout: 1000,
-  headers: {
-    "X-Parse-Application-Id": "lzQ61WWmjSxYma4dOZSVhO5Ofo9HQ0WaXT1bTRyY",
-    "X-Parse-JavaScript-Key": "VzOBLroXdlFsuyozWeDEVGHSB4PGNJkpTbXUeSWk",
-  },
-});
+import { headerJson, headerRevocableSession, instance } from "./config";
 
 export async function signingUp({ password, username, email }) {
   const { data } = await instance.post(

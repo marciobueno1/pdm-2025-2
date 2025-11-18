@@ -1,42 +1,36 @@
-import axios from "axios";
+import { headerJson, instance, xParseSessionTokenKey } from "./config";
 
-const headerJson = {
-  "Content-Type": "application/json",
-};
-
-const instance = axios.create({
-  baseURL: "https://parseapi.back4app.com",
-  timeout: 1000,
-  headers: {
-    "X-Parse-Application-Id": "lzQ61WWmjSxYma4dOZSVhO5Ofo9HQ0WaXT1bTRyY",
-    "X-Parse-JavaScript-Key": "VzOBLroXdlFsuyozWeDEVGHSB4PGNJkpTbXUeSWk",
-  },
-});
-
-export async function getTarefas() {
-  const { data } = await instance.get("/classes/Tarefa");
+export async function getTarefas(sessionToken) {
+  console.log("getTarefas");
+  const { data } = await instance.get("/classes/Tarefa", {
+    headers: { [xParseSessionTokenKey]: sessionToken },
+  });
   return data?.results;
 }
 
-export async function updateTarefa(tarefa) {
+export async function updateTarefa({ tarefa, sessionToken }) {
+  const headers = { ...headerJson, [xParseSessionTokenKey]: sessionToken };
   const { data } = await instance.put(
     `/classes/Tarefa/${tarefa.objectId}`,
     { descricao: tarefa.descricao, concluida: tarefa.concluida },
-    { headers: headerJson }
+    { headers }
   );
   return data;
 }
 
-export async function addTarefa({ descricao }) {
+export async function addTarefa({ descricao, sessionToken }) {
+  const headers = { ...headerJson, [xParseSessionTokenKey]: sessionToken };
   const { data } = await instance.post(
     `/classes/Tarefa`,
     { descricao },
-    { headers: headerJson }
+    { headers }
   );
   return data;
 }
 
-export async function deleteTarefa(tarefa) {
-  const { data } = await instance.delete(`/classes/Tarefa/${tarefa.objectId}`);
+export async function deleteTarefa({ tarefa, sessionToken }) {
+  const { data } = await instance.delete(`/classes/Tarefa/${tarefa.objectId}`, {
+    headers: { [xParseSessionTokenKey]: sessionToken },
+  });
   return data;
 }

@@ -1,4 +1,5 @@
 import { addTarefa, deleteTarefa, getTarefas, updateTarefa } from "@/api";
+import { useStore } from "@/zustand";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import {
@@ -13,17 +14,26 @@ import {
 import { CardTarefa } from "../components/CardTarefa";
 
 export default function TelaTarefas() {
+  const { user } = useStore((state) => state);
   const [descricao, setDescricao] = useState("");
   const queryClient = useQueryClient();
   const { isPending, error, data, isFetching } = useQuery({
     queryKey: ["tarefas"],
-    queryFn: getTarefas,
+    queryFn: () => getTarefas(user?.sessionToken),
   });
 
   const updateMutation = useMutation({
     mutationFn: updateTarefa,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tarefas"] });
+    },
+    onError: (error) => {
+      Alert.alert(
+        "Atenção",
+        "Erro ao atualizar tarefa: " +
+          error.message +
+          "\nVocê precisa estar logado"
+      );
     },
   });
 
@@ -33,12 +43,26 @@ export default function TelaTarefas() {
       queryClient.invalidateQueries({ queryKey: ["tarefas"] });
       setDescricao("");
     },
+    onError: (error) => {
+      Alert.alert(
+        "Atenção",
+        "Erro ao criar tarefa: " + error.message + "\nVocê precisa estar logado"
+      );
+    },
   });
 
   const deleteMutation = useMutation({
     mutationFn: deleteTarefa,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tarefas"] });
+    },
+    onError: (error) => {
+      Alert.alert(
+        "Atenção",
+        "Erro ao remover tarefa: " +
+          error.message +
+          "\nVocê precisa estar logado"
+      );
     },
   });
 
@@ -47,19 +71,22 @@ export default function TelaTarefas() {
       Alert.alert("Atenção", "A descrição não pode estar vazia");
       return;
     }
-    addMutation.mutate({ descricao });
+    addMutation.mutate({ descricao, sessionToken: user?.sessionToken });
   };
 
   function handleToggle(tarefa) {
     console.log("toggle executado", tarefa);
     updateMutation.mutate({
-      ...tarefa,
-      concluida: !tarefa.concluida,
+      tarefa: {
+        ...tarefa,
+        concluida: !tarefa.concluida,
+      },
+      sessionToken: user?.sessionToken,
     });
   }
 
   function handleDelete(tarefa) {
-    deleteMutation.mutate(tarefa);
+    deleteMutation.mutate({ tarefa, sessionToken: user?.sessionToken });
   }
 
   return (
